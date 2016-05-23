@@ -3,9 +3,12 @@ import pylab as P
 import matplotlib.pyplot as plt
 import numpy as np
 
+from itertools import cycle
+
 from sklearn import cluster
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
+from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import scale
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
@@ -24,6 +27,12 @@ test_df = pd.read_csv(test_file, header=0, encoding='utf-8-sig', engine='python'
 # Used df.dtypes to see what the column names are.
 # print(train_df.dtypes)
 # df['GenderTarget'] = 4
+
+# Move gender from the first position, to the last position
+cols = train_df.columns.tolist()
+cols = cols[2:] + cols[:2]
+train_df = train_df[cols]
+test_df = test_df[cols]
 
 # Transform the gender STRING to integer. So we can work with it. Female: 0, Male: 1
 train_df.Gender = train_df.Gender.map({'female': 0, 'male': 1}).astype(int)
@@ -56,40 +65,68 @@ evaluate_data = evaluate_df.values
 print(type(train_data))
 # From https://www.kaggle.com/c/titanic/details/getting-started-with-python-ii
 
-# print(train_data)
+
+### ---  ### --- ### --- ### --- ### --- ### --- ###
+# Naive Bayes Classification #
+# nbc = GaussianNB()
+# nbc.fit()
 
 
-# RandomForest Classification
-forest = RandomForestClassifier(n_estimators=10)
-forest = forest.fit(train_data[0::, 1::], train_data[0::, 0])
-# Prediction if the user is more lightly to be male or female
-output = forest.predict(test_data)
 
-print(output)
+### ---  ### --- ### --- ### --- ### --- ### --- ###
 
-# print(evaluate_data)
 
+
+
+# RandomForest Classification #
+# forest = RandomForestClassifier(n_estimators=10)
+# forest = forest.fit(train_data[0::,:4], train_data[0::,:5])
+# # Prediction if the user is more lightly to be male or female
+# output = forest.predict(test_data)
+# print(output)
+#
 # score = forest.score(test_data, evaluate_data)
 # print(score)
-
-exit()
-
+# print(output)
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 # KMeans clustering
 # For testing, set the targets
 n_targets = 5
 
-# data = train_data
+# data = train_data[:10000]
+data = test_data
+
 # # data = scale(train_data)
-# print(data)
 
 # Make SKLEARN try to calculate the amount of clusters.
+# FROM : http://scikit-learn.org/stable/auto_examples/cluster/plot_affinity_propagation.html
 print("How many clusters do we need?")
 calc_clusters = cluster.AffinityPropagation().fit(data)
 print(calc_clusters)
 print("We need " + str(len(calc_clusters.cluster_centers_indices_)))
-print(calc_clusters.labels_)
+
+cluster_centers_indices = calc_clusters.cluster_centers_indices_
+labels = calc_clusters.labels_
+n_clusters_ = len(cluster_centers_indices)
+
+plt.figure(1)
+plt.clf()
+colors = cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
+for k, col in zip(range(n_clusters_), colors):
+    class_members = labels == k
+    cluster_center = data[cluster_centers_indices[k]]
+    plt.plot(data[class_members, 0], data[class_members, 1], col + '.')
+    plt.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor=col,
+             markeredgecolor='k', markersize=14)
+    for x in data[class_members]:
+        plt.plot([cluster_center[0], x[0]], [cluster_center[1], x[1]], col)
+
+plt.title('Estimated number of clusters: %d' % n_clusters_)
+plt.show()
+
+### --- ### --- ### --- ### --- ### --- ###
+
 exit()
 
 k_means = cluster.KMeans(init='k-means++', n_clusters=n_targets)
