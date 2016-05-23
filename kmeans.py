@@ -12,13 +12,12 @@ filename = 'fakenames50k.csv'
 csv_reader = pd.read_csv(filename, delimiter=',', dtype=None)
 whole_data = csv_reader.as_matrix()  # turn it into numpy.ndarray
 
-subset = 10000
-
+subset = 1000
 # create subset
 data = whole_data[:subset]
-
 print(data.shape)
-exit()
+
+# exit()
 
 clustset = np.empty((subset,3))
 count = 0
@@ -28,9 +27,9 @@ for row in data:
     kg = row[39]  # 39 - Kg
     cm = row[41]  # 41 - Cm
 
-    clustset[count,0] = age;
-    clustset[count,1] = kg;
-    clustset[count,2] = cm;
+    clustset[count, 0] = age
+    clustset[count, 1] = kg
+    clustset[count, 2] = cm
     print("COUNT: "+str(count))
     count += 1
 
@@ -61,16 +60,16 @@ for row in data:
 
 
 time_start = time.time()
-kgemeen = cluster.KMeans(n_clusters=8)
+k_mean = cluster.KMeans(n_clusters=8)
 
-kgemeen.fit(clustset)
+k_mean.fit(clustset)
 
 t_batch = time.time() - time_start
 print("Batch done in " + str(t_batch) + " seconds")
 
 # print(kgemeen.labels_[::10])
 # print(kgemeen.cluster_centers_)
-unique_clust_labels = np.unique(kgemeen.labels_)
+unique_clust_labels = np.unique(k_mean.labels_)
 
 print(unique_clust_labels)
 

@@ -8,7 +8,7 @@ from sklearn.preprocessing import scale
 
 filename = 'fakenames50k.csv'
 csv_reader = pd.read_csv(filename, delimiter=',', dtype=None)
-whole_data = csv_reader.as_matrix()  # turn it into numpy.ndarray
+whole_data = csv_reader.as_matrix()  # turn it into numpy.ndarray > needed for sklearn
 
 subset_size = 5000
 subset = whole_data[:subset_size]
@@ -35,6 +35,9 @@ for row in subset:
     count += 1
 
 targets = np.unique(target)
+
+print(target)
+exit()
 n_targets = len(targets)
 data = scale(data)
 
@@ -46,8 +49,11 @@ print("n_targets: %d, n_samples: %d, n_features: %d"
 k_means = cluster.KMeans(init='k-means++', n_clusters=n_targets)
 k_means.fit(data)
 
-print(k_means.score())
-exit()
+
+
+
+# print(k_means.score(data))
+# exit()
 
 
 print(metrics.homogeneity_score(target, k_means.labels_))
@@ -92,9 +98,6 @@ plt.ylim(y_min, y_max)
 plt.xticks(())
 plt.yticks(())
 plt.show()
-
-
-exit()
 
 
 print(78 * '_')
