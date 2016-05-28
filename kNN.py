@@ -3,7 +3,7 @@ import pandas as pd
 from random import randint
 
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import train_test_split, cross_val_score
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 # Data preparation
@@ -61,6 +61,11 @@ X_train, X_test = train_test_split(train_data, test_size=0.33, random_state=1337
 
 knn = KNeighborsClassifier(n_neighbors=5)  # Use 5 neighbour classification (bo5)
 
+# Use cross_val_score to determine the accuracy score with the kNN clasification
+scores = cross_val_score(knn, X_train[0::, :4], X_train[0::, 4])
+print(scores)
+
+
 knn.fit(X_train[0::, 0:4], X_train[0::, 4])
 
 prediction = knn.predict(X_test[24:25, 0:4])
@@ -69,6 +74,7 @@ print(prediction)  # Prediction
 
 score = knn.score(X_test[0::, :4], X_test[0::, 4:5])
 print(score)
+
 
 
 def score_knn_model_by_iterations(data, iterations, train_size, n_neighbors=5):
