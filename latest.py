@@ -9,7 +9,6 @@ from itertools import cycle
 from sklearn import cluster
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
-from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import scale
 from sklearn.cross_validation import train_test_split
 
@@ -66,24 +65,9 @@ print(type(train_data))
 # ## # ## # ## # ## #
 
 
-
-
-
 ### ---  ### --- ### --- ### --- ### --- ### --- ###
 
 
-
-
-# RandomForest Classification #
-# forest = RandomForestClassifier(n_estimators=10)
-# forest = forest.fit(train_data[0::,:4], train_data[0::,:5])
-# # Prediction if the user is more lightly to be male or female
-# output = forest.predict(test_data)
-# print(output)
-#
-# score = forest.score(test_data, evaluate_data)
-# print(score)
-# print(output)
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 # KMeans clustering
