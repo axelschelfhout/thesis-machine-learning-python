@@ -1,51 +1,89 @@
-from numpy import *
-import operator
+import pandas as pd
 
-def createDataSet():
-    group = array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
-    labels = ['A','A','B','B']
-    return group, labels
+from random import randint
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.cross_validation import train_test_split
+
+# -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
+# Data preparation
+
+big_file = 'fakenames50k.csv'
+small_file = 'fakeprofiledataset.csv'
+
+train_file = big_file
+test_file = small_file
+
+# The header is in the first row. By adding header=0 we tell pd.read_csv it is
+train_df = pd.read_csv(train_file, header=0, encoding='utf-8-sig', engine='python')
+test_df = pd.read_csv(test_file, header=0, encoding='utf-8-sig', engine='python')
+
+# Used df.dtypes to see what the column names are.
+# print(train_df.dtypes)
+# df['GenderTarget'] = 4
+
+# Move gender from the first position, to the last position
+cols = train_df.columns.tolist()
+cols = cols[2:] + cols[:2]
+train_df = train_df[cols]
+test_df = test_df[cols]
+
+# Transform the gender STRING to integer. So we can work with it. Female: 0, Male: 1
+train_df.Gender = train_df.Gender.map({'female': 0, 'male': 1}).astype(int)
+test_df.Gender = test_df.Gender.map({'female': 0, 'male': 1}).astype(int)
+
+# Remove all the other Object types in the data frame.
+df_drop = train_df.dtypes[train_df.dtypes.map(lambda x: x == 'object')].keys()
+train_df = train_df.drop(df_drop, axis=1)
+dropable_columns = ['NationalID', 'Longitude', 'Latitude', 'WesternUnionMTCN', 'MoneyGramMTCN', 'TelephoneCountryCode', 'CCNumber', 'CVV2', 'Number']
+train_df = train_df.drop(dropable_columns, axis=1)
+
+test_df = test_df.drop(df_drop, axis=1)
+test_df = test_df.drop(dropable_columns, axis=1)
+
+evaluate_df = test_df
+# evaluate_df.Gender = evaluate_df.Gender.map({'female': 0, 'male': 1}).astype(int)
+# test_df = test_df.drop(['Gender'], axis=1)
+
+print(train_df.describe())
+
+# The data frames values function will make this in to a Numpy array so we can use it in sklearn.
+train_data = train_df.values
+test_data = test_df.values
+evaluate_data = evaluate_df.values
+print(type(train_data))
+# From https://www.kaggle.com/c/titanic/details/getting-started-with-python-ii
 
 
-def classify0(inX, dataSet, labels, k):
-    dataSetSize = dataSet.shape[0]  # 0 = rows, 1 = columns
+# kNN (k nearest neighbor) #
 
-    diffMat = tile(inX, (dataSetSize, 1)) - dataSet
-    sqDiffMat = diffMat**2
-    sqDistances = sqDiffMat.sum(axis=1)
-    distances = sqDistances**0.5
-    sortedDistIndices = distances.argsort()
+X_train, X_test = train_test_split(train_data, test_size=0.33, random_state=1337)
 
-    classCount = {}
-    for i in range(k):
-        voteIlabel = labels[sortedDistIndices[i]]
-        classCount[voteIlabel] = classCount.get(voteIlabel, 0) + 1
-    sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse=True)
+knn = KNeighborsClassifier(n_neighbors=5)  # Use 5 neighbour classification (bo5)
 
-    return sortedClassCount[0][0]
+knn.fit(X_train[0::, 0:4], X_train[0::, 4])
+
+prediction = knn.predict(X_test[24:25, 0:4])
+print(X_test[24:25, 4])  # Real
+print(prediction)  # Prediction
+
+score = knn.score(X_test[0::, :4], X_test[0::, 4:5])
+print(score)
 
 
-def file2matrix(filename):
-    fr = open(filename)
-    number_of_lines = len(fr.readlines())
-    return_mat = zeros((number_of_lines,3))
-    class_label_vector = []
+def score_knn_model_by_iterations(data, iterations, train_size, n_neighbors=5):
+    model_score = []
+    for i in range(0, iterations):
+        rand = randint(0,len(data))
+        x_train, x_test = train_test_split(data, train_size=train_size, random_state=rand)
 
-    fr = open(filename)
-    index = 0
-    for line in fr.readlines():
-        line = line.strip()
-        list_from_line = line.split('\t')
-        return_mat[index, :] = list_from_line[0:3]
-        class_label_vector.append(list_from_line[-1])  # the example did append(int... this didn't work.
-        index += 1
-    return return_mat, class_label_vector
+        f_knn = KNeighborsClassifier(n_neighbors=n_neighbors)
+        f_knn.fit(x_train[0::, 0:4], x_train[0::, 4])
 
+        this_score = f_knn.score(x_test[0::, :4], x_test[0::, 4:5])
+        model_score.append(this_score)
+    return sum(model_score)/len(model_score)
 
-
-
-
-# group, labels = createDataSet()
-#
-# d = classify0([1.1,0], group, labels, 3)
-# print(d)
+score_model_accuracy = score_knn_model_by_iterations(train_data, 20, 0.66, 5)
+print(score_model_accuracy)
+exit()

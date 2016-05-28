@@ -98,6 +98,6 @@ def score_nbc_model_by_iterations(data, iterations, train_size):
         model_score.append(this_score)
     return sum(model_score)/len(model_score)
 
-nbc_accuracy_score = score_nbc_model_by_iterations(X_train, 10, 0.3)
+nbc_accuracy_score = score_nbc_model_by_iterations(X_train, 20, 0.66)
 print(nbc_accuracy_score)
 exit()
