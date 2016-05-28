@@ -3,6 +3,7 @@ import pylab as P
 import matplotlib.pyplot as plt
 import numpy as np
 
+from random import randint
 from itertools import cycle
 
 from sklearn import cluster
@@ -10,6 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import scale
+from sklearn.cross_validation import train_test_split
 
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 # Data preparation
@@ -36,7 +38,7 @@ test_df = test_df[cols]
 
 # Transform the gender STRING to integer. So we can work with it. Female: 0, Male: 1
 train_df.Gender = train_df.Gender.map({'female': 0, 'male': 1}).astype(int)
-# test_df.Gender = test_df.Gender.map({'female': 0, 'male': 1}).astype(int)
+test_df.Gender = test_df.Gender.map({'female': 0, 'male': 1}).astype(int)
 
 # Remove all the other Object types in the data frame.
 df_drop = train_df.dtypes[train_df.dtypes.map(lambda x: x == 'object')].keys()
@@ -47,16 +49,11 @@ train_df = train_df.drop(dropable_columns, axis=1)
 test_df = test_df.drop(df_drop, axis=1)
 test_df = test_df.drop(dropable_columns, axis=1)
 
-# For testing we dont need the gender. But for the evaluation we need it
 evaluate_df = test_df
-evaluate_df.Gender = evaluate_df.Gender.map({'female': 0, 'male': 1}).astype(int)
-test_df = test_df.drop(['Gender'], axis=1)
+# evaluate_df.Gender = evaluate_df.Gender.map({'female': 0, 'male': 1}).astype(int)
+# test_df = test_df.drop(['Gender'], axis=1)
 
 print(train_df.describe())
-
-# This histogram tells the biggest age groups
-# df.Age.hist()
-# P.show()
 
 # The data frames values function will make this in to a Numpy array so we can use it in sklearn.
 train_data = train_df.values
@@ -66,10 +63,9 @@ print(type(train_data))
 # From https://www.kaggle.com/c/titanic/details/getting-started-with-python-ii
 
 
-### ---  ### --- ### --- ### --- ### --- ### --- ###
-# Naive Bayes Classification #
-# nbc = GaussianNB()
-# nbc.fit()
+# ## # ## # ## # ## #
+
+
 
 
 
@@ -124,6 +120,7 @@ for k, col in zip(range(n_clusters_), colors):
 
 plt.title('Estimated number of clusters: %d' % n_clusters_)
 plt.show()
+# from http://scikit-learn.org/stable/auto_examples/cluster/plot_affinity_propagation.html
 
 ### --- ### --- ### --- ### --- ### --- ###
 
