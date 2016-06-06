@@ -63,7 +63,6 @@ X_train, X_test = train_test_split(train_data, test_size=0.33, random_state=1337
 
 nbc = GaussianNB()
 nbc_X = X_train[0::, 0:4]
-
 # Get the 'label' and parse it to a 1dimentional array to use in our fit method.
 nbc_Y_2d = X_train[0::, 4:5]
 nbc_Y = nbc_Y_2d[:,0]

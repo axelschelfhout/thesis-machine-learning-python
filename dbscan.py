@@ -1,8 +1,8 @@
 import pandas as pd
-from random import randint
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.cross_validation import train_test_split
+import numpy as np
 
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
 # -- # -- # -- # -- # -- # -- # -- # -- # -- # -- #
 # Data preparation
 
@@ -53,37 +53,9 @@ print(type(train_data))
 # From https://www.kaggle.com/c/titanic/details/getting-started-with-python-ii
 
 
+np.random.shuffle(train_data)
+db_scan = DBSCAN(eps=2, min_samples=3)
+db_scan.fit(train_data)
+# The amount of clusters found
+print(len(np.unique(db_scan.labels_)))
 
-# RandomForest Classification #
-
-# Split our data up into train and test data.
-X_train, X_test = train_test_split(train_data, train_size=0.66, random_state=1337)
-
-forest = RandomForestClassifier(n_estimators=70)
-forest = forest.fit(X_train[0::, :4], X_train[0::, 4])
-# Prediction if the user is more lightly to be male or female
-output = forest.predict([X_test[5, :4]])
-print(X_test[5,0:5])
-print(output)
-
-score = forest.score(X_test[0::, :4], X_test[0::, 4:5])
-print(score)
-
-
-def score_random_forrest_model_by_iterations(data, iterations, train_size, n_estimators=10):
-    model_score = []
-    for i in range(0, iterations):
-        rand = randint(0,len(data))
-        x_train, x_test = train_test_split(data, train_size=train_size, random_state=rand)
-
-        f_rfc = RandomForestClassifier(n_estimators=n_estimators)
-        f_rfc.fit(x_train[0::, 0:4], x_train[0::, 4])
-
-        this_score = f_rfc.score(x_test[0::, :4], x_test[0::, 4:5])
-        model_score.append(this_score)
-    return sum(model_score)/len(model_score)
-score_model_accuracy = score_random_forrest_model_by_iterations(train_data, 20, 0.66, 70)
-print(score_model_accuracy)
-
-
-exit()

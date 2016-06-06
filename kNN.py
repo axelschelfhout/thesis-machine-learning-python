@@ -11,11 +11,11 @@ from sklearn.cross_validation import train_test_split, cross_val_score
 big_file = 'fakenames50k.csv'
 small_file = 'fakeprofiledataset.csv'
 
-train_file = big_file
-test_file = small_file
-
+train_file = 'fakenames50k.csv'
 # The header is in the first row. By adding header=0 we tell pd.read_csv it is
 train_df = pd.read_csv(train_file, header=0, encoding='utf-8-sig', engine='python')
+
+test_file = 'fakeprofiledataset.csv'
 test_df = pd.read_csv(test_file, header=0, encoding='utf-8-sig', engine='python')
 
 # Used df.dtypes to see what the column names are.
@@ -35,17 +35,18 @@ test_df.Gender = test_df.Gender.map({'female': 0, 'male': 1}).astype(int)
 # Remove all the other Object types in the data frame.
 df_drop = train_df.dtypes[train_df.dtypes.map(lambda x: x == 'object')].keys()
 train_df = train_df.drop(df_drop, axis=1)
-dropable_columns = ['NationalID', 'Longitude', 'Latitude', 'WesternUnionMTCN', 'MoneyGramMTCN', 'TelephoneCountryCode', 'CCNumber', 'CVV2', 'Number']
-train_df = train_df.drop(dropable_columns, axis=1)
+dropable_numeric_columns  = ['NationalID', 'Longitude', 'Latitude', 'WesternUnionMTCN', 'MoneyGramMTCN', 'TelephoneCountryCode', 'CCNumber', 'CVV2', 'Number']
+train_df = train_df.drop(dropable_numeric_columns , axis=1)
 
 test_df = test_df.drop(df_drop, axis=1)
-test_df = test_df.drop(dropable_columns, axis=1)
+test_df = test_df.drop(dropable_numeric_columns , axis=1)
 
 evaluate_df = test_df
 # evaluate_df.Gender = evaluate_df.Gender.map({'female': 0, 'male': 1}).astype(int)
 # test_df = test_df.drop(['Gender'], axis=1)
 
 print(train_df.describe())
+
 
 # The data frames values function will make this in to a Numpy array so we can use it in sklearn.
 train_data = train_df.values
@@ -56,17 +57,21 @@ print(type(train_data))
 
 
 # kNN (k nearest neighbor) #
+# Split up the train
+X_train, X_test = train_test_split(train_data, train_size=0.7, random_state=randint(0,len(train_data)))
 
-X_train, X_test = train_test_split(train_data, test_size=0.33, random_state=1337)
+# Use 5 neighbour classification (k=5)
+knn = KNeighborsClassifier(n_neighbors=5)
 
-knn = KNeighborsClassifier(n_neighbors=5)  # Use 5 neighbour classification (bo5)
 
-# Use cross_val_score to determine the accuracy score with the kNN clasification
-scores = cross_val_score(knn, X_train[0::, :4], X_train[0::, 4])
-print(scores)
 
 
 knn.fit(X_train[0::, 0:4], X_train[0::, 4])
+
+# Use cross_val_score to determine the accuracy score with the kNN clasification
+scores = cross_val_score(knn, X_test[0::, :4], X_test[0::, 4], cv=10)
+print(scores)
+print(sum(scores)/10)
 
 prediction = knn.predict(X_test[24:25, 0:4])
 print(X_test[24:25, 4])  # Real
@@ -90,6 +95,6 @@ def score_knn_model_by_iterations(data, iterations, train_size, n_neighbors=5):
         model_score.append(this_score)
     return sum(model_score)/len(model_score)
 
-score_model_accuracy = score_knn_model_by_iterations(train_data, 20, 0.66, 5)
+score_model_accuracy = score_knn_model_by_iterations(train_data, 20, 0.7, 5)
 print(score_model_accuracy)
 exit()
