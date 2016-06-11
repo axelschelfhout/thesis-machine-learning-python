@@ -95,6 +95,6 @@ def score_knn_model_by_iterations(data, iterations, train_size, n_neighbors=5):
         model_score.append(this_score)
     return sum(model_score)/len(model_score)
 
-score_model_accuracy = score_knn_model_by_iterations(train_data, 20, 0.7, 5)
+score_model_accuracy = score_knn_model_by_iterations(train_data, 10, 0.7, 5)
 print(score_model_accuracy)
 exit()
